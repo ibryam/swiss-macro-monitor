@@ -139,7 +139,43 @@ Entries are appended in order — never edited or deleted.
 
 ---
 
-## [005] 2026-04-04 — GitHub Actions Monthly Schedule
+## [005] 2026-04-04 — dbt Beginner Guide
+
+**What:** Created `DBT_GUIDE.md` — a plain-English explanation of dbt for someone who has never used it before.
+
+**Why:** dbt transforms data through 4 stages (raw → staging → intermediate → marts). Without documentation, it is impossible to understand why the data looks different at each stage or how Tableau gets its final clean table. This guide explains every stage with before/after examples and real SQL snippets from this project.
+
+**What the guide covers:**
+- What dbt is and why we use it
+- The golden rule: dbt never modifies raw data
+- Full data flow diagram from APIs to dashboard
+- Stage-by-stage explanation with before/after column examples
+- How dbt resolves model run order automatically via DAG
+- What dbt tests do and why they matter
+- Every file in the dbt project folder explained
+
+---
+
+## [006] 2026-04-04 — GitHub Actions Monthly Schedule
+
+**What:** Created `.github/workflows/monthly_ingest.yml` — automated pipeline that runs all 3 ingestion scripts on the 2nd of every month.
+
+**Why:** Macro data (FRED, SNB, OECD) updates monthly, not daily. Running daily would waste GitHub Actions minutes and add no value. The 2nd of the month (not the 1st) gives data providers time to publish their monthly update before we try to fetch it.
+
+**How it works:**
+- Trigger: cron `0 7 2 * *` — 07:00 UTC on the 2nd of every month
+- Manual trigger: `workflow_dispatch` — allows one-click run from GitHub Actions UI for testing
+- Steps: checkout → Python 3.12 → install requirements → authenticate GCP → FRED → SNB → OECD → cleanup
+
+**Secrets required:**
+- `FRED_API_KEY` — registered at fred.stlouisfed.org (free)
+- `GCP_SERVICE_ACCOUNT_KEY` — full JSON contents of GCP service account key
+
+**Security:** GCP JSON key written to temp file during run, deleted in cleanup step that runs even if the job fails (`if: always()`).
+
+**GitHub Actions cost:** ~2 min/run × 12 runs/year = ~24 min/year. SMI Risk Monitor uses ~110 min/month. Total across both projects well within 2,000 free minutes/month.
+
+--- 2026-04-04 — GitHub Actions Monthly Schedule
 
 **What:** Created `.github/workflows/monthly_ingest.yml` — automated pipeline that runs all 3 ingestion scripts on the 2nd of every month.
 
