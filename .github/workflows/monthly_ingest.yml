@@ -1,0 +1,46 @@
+name: Monthly Macro Ingestion
+
+on:
+  schedule:
+    # Runs at 07:00 UTC on the 2nd of every month
+    # (2nd not 1st — gives sources time to publish their monthly update)
+    - cron: '0 7 2 * *'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  ingest:
+    name: Ingest all macro sources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Authenticate to Google Cloud
+        run: |
+          echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' > gcp-key.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/gcp-key.json" >> $GITHUB_ENV
+
+      - name: Run FRED ingestion
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python ingestion/ingest_fred.py
+
+      - name: Run SNB ingestion
+        run: python ingestion/ingest_snb.py
+
+      - name: Run OECD ingestion
+        run: python ingestion/ingest_oecd.py
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f gcp-key.json

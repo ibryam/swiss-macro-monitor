@@ -138,3 +138,24 @@ Entries are appended in order — never edited or deleted.
 - Stray backtick in table reference string caused 400 error on first run. Fixed typo in `load_rows()`.
 
 ---
+
+## [005] 2026-04-04 — GitHub Actions Monthly Schedule
+
+**What:** Created `.github/workflows/monthly_ingest.yml` — automated pipeline that runs all 3 ingestion scripts on the 2nd of every month.
+
+**Why:** Macro data (FRED, SNB, OECD) updates monthly, not daily. Running daily would waste GitHub Actions minutes and add no value. The 2nd of the month (not the 1st) gives data providers time to publish their monthly update before we try to fetch it.
+
+**How it works:**
+- Trigger: cron `0 7 2 * *` — 07:00 UTC on the 2nd of every month
+- Manual trigger: `workflow_dispatch` — allows one-click run from the GitHub Actions UI for testing
+- Steps in order: checkout → Python 3.12 → install requirements → authenticate GCP → FRED → SNB → OECD → cleanup credentials
+
+**Secrets required in GitHub repo settings:**
+- `FRED_API_KEY` — FRED API key (free, registered at fred.stlouisfed.org)
+- `GCP_SERVICE_ACCOUNT_KEY` — full JSON contents of the GCP service account key file
+
+**Security:** The GCP JSON key is written to a temp file during the run and deleted in a `cleanup` step that runs even if the job fails (`if: always()`). The key is never stored in the repo or logs.
+
+**GitHub Actions cost:** Public repos get 2,000 free minutes/month. This workflow uses ~2 minutes per run × 12 months = ~24 minutes/year. Well within free limits.
+
+---

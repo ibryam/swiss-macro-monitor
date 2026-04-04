@@ -87,7 +87,7 @@ This makes it possible to compare and combine indicators across sources in one p
 - [x] 3. SNB ingestion (SARON, policy rate, CHF/EUR, CHF/USD)
 - [x] 4. OECD ingestion (GDP growth, manufacturing, retail trade, exports, employment, interbank rate)
 - [ ] 5. dbt pipeline (staging → intermediate → marts)
-- [ ] 6. GitHub Actions automated schedule
+- [x] 6. GitHub Actions automated schedule (monthly, 2nd of each month at 07:00 UTC)
 - [ ] 7. Tableau Public dashboard
 
 ---
