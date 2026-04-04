@@ -175,23 +175,40 @@ Entries are appended in order — never edited or deleted.
 
 **GitHub Actions cost:** ~2 min/run × 12 runs/year = ~24 min/year. SMI Risk Monitor uses ~110 min/month. Total across both projects well within 2,000 free minutes/month.
 
---- 2026-04-04 — GitHub Actions Monthly Schedule
+---
 
-**What:** Created `.github/workflows/monthly_ingest.yml` — automated pipeline that runs all 3 ingestion scripts on the 2nd of every month.
+## [007] 2026-04-04 — dbt Staging Models (3/3 passing, 9/9 tests passing)
 
-**Why:** Macro data (FRED, SNB, OECD) updates monthly, not daily. Running daily would waste GitHub Actions minutes and add no value. The 2nd of the month (not the 1st) gives data providers time to publish their monthly update before we try to fetch it.
+**What:** Built 3 dbt staging models — one per data source — plus sources declaration and test configuration.
 
-**How it works:**
-- Trigger: cron `0 7 2 * *` — 07:00 UTC on the 2nd of every month
-- Manual trigger: `workflow_dispatch` — allows one-click run from the GitHub Actions UI for testing
-- Steps in order: checkout → Python 3.12 → install requirements → authenticate GCP → FRED → SNB → OECD → cleanup credentials
+**Why:** Staging is the first transformation layer. Its only job is to clean raw data: fix data types, standardise date formats across 3 different APIs, and remove null rows. No calculations happen here — just cleaning.
 
-**Secrets required in GitHub repo settings:**
-- `FRED_API_KEY` — FRED API key (free, registered at fred.stlouisfed.org)
-- `GCP_SERVICE_ACCOUNT_KEY` — full JSON contents of the GCP service account key file
+**Files created:**
+- `dbt/dbt_project.yml` — project config: dataset names (swiss_macro_staging, _intermediate, _marts), materialisations (views for staging/intermediate, tables for marts)
+- `dbt/profiles.yml` — local BigQuery connection (gitignored)
+- `dbt/profiles.ci.yml` — CI BigQuery connection (committed, uses gcp-key.json from GitHub secret)
+- `dbt/models/staging/_sources.yml` — declares the 3 raw BigQuery tables as dbt sources
+- `dbt/models/staging/_staging.yml` — documents and tests all staging models
+- `dbt/models/staging/stg_fred_indicators.sql` — cleans FRED data (DATE cast, null filter)
+- `dbt/models/staging/stg_snb_indicators.sql` — cleans SNB data (handles YYYY-MM-DD and YYYY-MM formats)
+- `dbt/models/staging/stg_oecd_indicators.sql` — cleans OECD data (handles YYYY-MM-DD, YYYY-MM, YYYY-QX and YYYY formats)
 
-**Security:** The GCP JSON key is written to a temp file during the run and deleted in a `cleanup` step that runs even if the job fails (`if: always()`). The key is never stored in the repo or logs.
+**Date format challenge — 3 sources, 4 different formats:**
 
-**GitHub Actions cost:** Public repos get 2,000 free minutes/month. This workflow uses ~2 minutes per run × 12 months = ~24 minutes/year. Well within free limits.
+| Source | Raw format | Example | Converted to |
+|--------|-----------|---------|-------------|
+| FRED | YYYY-MM-DD | 2024-01-01 | DATE directly |
+| SNB daily | YYYY-MM-DD | 2024-03-15 | DATE directly |
+| SNB monthly | YYYY-MM | 2024-03 | 2024-03-01 |
+| OECD monthly | YYYY-MM | 2024-03 | 2024-03-01 |
+| OECD quarterly | YYYY-QX | 2024-Q1 | 2024-01-01 |
+| OECD annual | YYYY | 2024 | 2024-01-01 |
+
+**Bug fixed during build:**
+- Dataset name doubling (`swiss_macro_staging_swiss_macro_staging`) — caused by using `+dataset` instead of `+schema` in dbt_project.yml. Fixed to use `+schema` which appends to the profile dataset name.
+- OECD staging had 156 null dates from annual series (4-digit year format `YYYY`). Added `length(date) = 4` case to the date CASE statement.
+
+**BigQuery datasets created:**
+- `swiss-macro-monitor.swiss_macro_staging` — 3 views
 
 ---

@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: stg_fred_indicators
+    description: >
+      Cleaned FRED indicators for Switzerland.
+      Date cast to DATE type, nulls removed.
+      Covers GDP, CPI, unemployment, bond yields.
+    columns:
+      - name: date
+        description: First day of the observation period
+        tests: [not_null]
+      - name: series_id
+        description: FRED series identifier
+        tests: [not_null]
+      - name: value
+        description: Indicator value
+        tests: [not_null]
+
+  - name: stg_snb_indicators
+    description: >
+      Cleaned SNB indicators for Switzerland.
+      Mixed date formats (daily YYYY-MM-DD, monthly YYYY-MM) standardised to DATE.
+      Covers SARON, SNB policy rate, CHF/EUR, CHF/USD.
+    columns:
+      - name: date
+        description: First day of the observation period
+        tests: [not_null]
+      - name: series_id
+        description: SNB cube and series identifier
+        tests: [not_null]
+      - name: value
+        description: Indicator value
+        tests: [not_null]
+
+  - name: stg_oecd_indicators
+    description: >
+      Cleaned OECD KEI indicators for Switzerland.
+      Quarterly dates (YYYY-QX) and monthly dates (YYYY-MM) standardised to DATE.
+      Covers GDP growth, manufacturing, retail trade, exports, employment, interbank rate.
+    columns:
+      - name: date
+        description: First day of the observation period
+        tests: [not_null]
+      - name: series_id
+        description: OECD KEI series identifier
+        tests: [not_null]
+      - name: value
+        description: Indicator value
+        tests: [not_null]

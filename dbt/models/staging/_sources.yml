@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: swiss_macro_raw
+    database: swiss-macro-monitor
+    schema: swiss_macro_raw
+    description: >
+      Raw data exactly as downloaded from APIs.
+      Never modified — always the source of truth.
+
+    tables:
+      - name: raw_fred_indicators
+        description: Swiss macro indicators from FRED API (GDP, CPI, unemployment, bond yields)
+
+      - name: raw_snb_indicators
+        description: Swiss financial indicators from SNB API (SARON, policy rate, CHF/EUR, CHF/USD)
+
+      - name: raw_oecd_indicators
+        description: Swiss economic indicators from OECD KEI API (manufacturing, retail, exports, employment)

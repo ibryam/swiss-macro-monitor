@@ -86,7 +86,9 @@ This makes it possible to compare and combine indicators across sources in one p
 - [x] 2. FRED ingestion (GDP, CPI, unemployment, bond yields)
 - [x] 3. SNB ingestion (SARON, policy rate, CHF/EUR, CHF/USD)
 - [x] 4. OECD ingestion (GDP growth, manufacturing, retail trade, exports, employment, interbank rate)
-- [ ] 5. dbt pipeline (staging → intermediate → marts)
+- [x] 5a. dbt staging models (stg_fred, stg_snb, stg_oecd — 9/9 tests passing)
+- [ ] 5b. dbt intermediate model (MoM changes, rolling averages, signals)
+- [ ] 5c. dbt mart models (dashboard-ready tables)
 - [x] 6. GitHub Actions automated schedule (monthly, 2nd of each month at 07:00 UTC)
 - [ ] 7. Tableau Public dashboard
 

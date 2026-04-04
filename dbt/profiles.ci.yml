@@ -1,0 +1,12 @@
+swiss_macro_monitor:
+  target: ci
+  outputs:
+    ci:
+      type: bigquery
+      method: service-account
+      project: swiss-macro-monitor
+      dataset: swiss_macro
+      keyfile: "gcp-key.json"
+      threads: 4
+      timeout_seconds: 300
+      location: EU
