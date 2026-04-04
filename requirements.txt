@@ -1,0 +1,6 @@
+fredapi==0.5.1
+google-cloud-bigquery==3.25.0
+python-dotenv==1.0.1
+yfinance==0.2.48
+requests==2.32.3
+pandas==2.2.3
