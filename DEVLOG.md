@@ -99,3 +99,42 @@ Entries are appended in order — never edited or deleted.
 - Table had to be deleted and recreated to force a clean full reload after the fix.
 
 ---
+
+## [004] 2026-04-04 — OECD Ingestion Script
+
+**What:** Built `ingestion/ingest_oecd.py` — pulls 6 Swiss economic indicators from the OECD KEI (Key short-term Economic Indicators) API into BigQuery.
+
+**Why:** The OECD provides clean, internationally comparable economic statistics for Switzerland covering growth, trade, labour and monetary indicators. No authentication required. The KEI dataset is the most comprehensive free source for Swiss short-term economic activity data not available via FRED or SNB.
+
+**How the API works:**
+- Authentication: none — fully public SDMX REST API
+- Base URL: `https://sdmx.oecd.org/public/rest/data/OECD.SDD.STES,DSD_KEI@DF_KEI/`
+- Country filter: `CHE` for Switzerland
+- Format: `csvfilewithlabels` — returns a wide CSV with labelled dimension columns
+- One API call fetches all Swiss KEI series — filtered in Python per indicator
+- No rate limiting documented
+
+**Series pulled:**
+
+| Series ID | Indicator | Category | Unit | Frequency |
+|-----------|-----------|----------|------|-----------|
+| KEI/CHE/B1GQ_Q/_T/GY | GDP Volume Growth YoY | growth | percent | quarterly |
+| KEI/CHE/PRVM/C/GY | Manufacturing Production Growth YoY | growth | percent | monthly |
+| KEI/CHE/TOVM/G47/GY | Retail Trade Volume Growth YoY | growth | percent | monthly |
+| KEI/CHE/EX/_T/G1 | Merchandise Exports Growth QoQ | external | percent | quarterly |
+| KEI/CHE/EMP/_T/_Z | Employment Total | labour | thousands | quarterly |
+| KEI/CHE/IRSTCI/_Z/_Z | Call Money Interbank Rate | monetary | percent | monthly |
+
+**Key design decisions:**
+- **Single API call for all series:** All Swiss KEI data fetched in one call (16,201 rows) and filtered in Python. Faster, reduces API load, avoids rate limits.
+- **Same unified schema:** Matches FRED and SNB — `date, source, series_id, indicator_name, indicator_category, value, unit, frequency, ingested_at`.
+- **Incremental load:** Same MAX(date) checkpoint pattern as FRED and SNB.
+
+**BigQuery table created:** `swiss-macro-monitor.swiss_macro_raw.raw_oecd_indicators`
+**Rows loaded:** 2,290 rows across 6 series
+
+**Bugs fixed during build:**
+- Switzerland (CHE) is not in the OECD CLI dataset — only G20 countries. Switched to KEI dataset which includes Switzerland.
+- Stray backtick in table reference string caused 400 error on first run. Fixed typo in `load_rows()`.
+
+---

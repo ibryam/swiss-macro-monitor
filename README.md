@@ -85,7 +85,7 @@ This makes it possible to compare and combine indicators across sources in one p
 - [x] 1. GitHub repository setup
 - [x] 2. FRED ingestion (GDP, CPI, unemployment, bond yields)
 - [x] 3. SNB ingestion (SARON, policy rate, CHF/EUR, CHF/USD)
-- [ ] 4. OECD ingestion (PMI, business confidence)
+- [x] 4. OECD ingestion (GDP growth, manufacturing, retail trade, exports, employment, interbank rate)
 - [ ] 5. dbt pipeline (staging → intermediate → marts)
 - [ ] 6. GitHub Actions automated schedule
 - [ ] 7. Tableau Public dashboard
