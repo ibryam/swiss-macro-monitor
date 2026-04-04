@@ -1,0 +1,49 @@
+version: 2
+
+models:
+  - name: mart_macro__time_series
+    description: >
+      One row per indicator per date. Powers Tabs 2, 3 and 4 of the dashboard.
+      Filter by indicator_category to get the right indicators for each tab:
+        Tab 2 Growth & Labour    — growth, labour
+        Tab 3 Monetary & Prices  — monetary, prices
+        Tab 4 Currency & External — currency, external
+      Use is_latest = true to get the most recent reading for KPI tiles.
+
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: series_id
+        tests: [not_null]
+      - name: indicator_name
+        tests: [not_null]
+      - name: indicator_category
+        tests: [not_null]
+      - name: value
+        tests: [not_null]
+      - name: signal
+        description: bullish, neutral or bearish — economic interpretation
+      - name: is_latest
+        description: true for the most recent observation per series
+
+  - name: mart_macro__overview
+    description: >
+      One row per date — wide format. Powers Tab 1 of the dashboard.
+      Every indicator is a separate column so Tableau can display KPI tiles
+      directly without filtering or pivoting.
+      Includes bullish_count, bearish_count and overall_signal columns
+      that summarise the composite health of the Swiss economy on each date.
+
+    columns:
+      - name: date
+        tests: [not_null]
+      - name: overall_signal
+        description: >
+          Composite economic signal for Switzerland on this date.
+          bullish if more indicators are bullish than bearish.
+          bearish if more indicators are bearish than bullish.
+          neutral if equal or mixed.
+      - name: bullish_count
+        description: Number of indicators signalling bullish on this date
+      - name: bearish_count
+        description: Number of indicators signalling bearish on this date

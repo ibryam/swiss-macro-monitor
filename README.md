@@ -88,7 +88,7 @@ This makes it possible to compare and combine indicators across sources in one p
 - [x] 4. OECD ingestion (GDP growth, manufacturing, retail trade, exports, employment, interbank rate)
 - [x] 5a. dbt staging models (stg_fred, stg_snb, stg_oecd — 9/9 tests passing)
 - [x] 5b. dbt intermediate model (MoM/YoY changes, rolling averages, signals — 5/5 tests passing)
-- [ ] 5c. dbt mart models (dashboard-ready tables)
+- [x] 5c. dbt mart models (mart_macro__time_series 13.2k rows, mart_macro__overview 5k rows — 6/6 tests passing)
 - [x] 6. GitHub Actions automated schedule (monthly, 2nd of each month at 07:00 UTC)
 - [ ] 7. Tableau Public dashboard
 

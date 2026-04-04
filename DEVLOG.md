@@ -250,3 +250,50 @@ Entries are appended in order — never edited or deleted.
 **Tests:** 5/5 passing (not_null on date, series_id, indicator_name, indicator_category, value)
 
 ---
+
+## [009] 2026-04-03 — dbt Mart Models (6/6 tests passing)
+
+**What:** Built two mart models — `mart_macro__time_series` and `mart_macro__overview` — the final dashboard-ready tables in BigQuery.
+
+**Why:** The intermediate model has all the data in a "tall" format (one row per indicator per date). The dashboard needs two different views of this data: a tall format for line charts (filter by category) and a wide format for KPI tiles (one column per indicator). Separating these into two marts keeps the SQL clean and each mart optimised for its purpose.
+
+---
+
+### mart_macro__time_series (13,200 rows)
+
+**Format:** Tall — one row per indicator per date.
+
+**Powers:** Tabs 2, 3 and 4 of the dashboard (line charts for Growth & Labour, Monetary & Prices, Currency & External). Tableau filters this table by `indicator_category` to show the right indicators on each tab.
+
+**Key addition:** `is_latest` flag — `ROW_NUMBER() OVER (PARTITION BY series_id ORDER BY date DESC) = 1`. When `is_latest = true`, that row is the most recent reading for that series. Used for KPI tiles that show current values.
+
+**All columns from intermediate are preserved** — date, source, series_id, indicator_name, indicator_category, value, unit, frequency, mom_change_pct, yoy_change_pct, rolling_avg_3m, rolling_avg_12m, trend, signal — plus `is_latest`.
+
+---
+
+### mart_macro__overview (5,000 rows)
+
+**Format:** Wide — one row per date, every indicator as its own column.
+
+**Powers:** Tab 1 of the dashboard (economy overview with KPI tiles for each indicator).
+
+**Pivot technique:** `MAX(CASE WHEN series_id = '...' THEN value END) AS column_name` — standard BigQuery pivot. Each series becomes a column. One date = full picture of the Swiss economy that month.
+
+**Columns per indicator:** value, MoM %, and signal — so Tableau can colour each KPI tile bullish/bearish without any calculations.
+
+**Composite signal:** Counts how many indicators are bullish vs bearish on each date:
+- `bullish_count` and `bearish_count` — sum of CASE WHEN signal = '...' THEN 1
+- `overall_signal` — 'bullish' if bullish_count > bearish_count, 'bearish' if reversed, 'neutral' if equal
+
+**Indicators in the composite signal:** gdp, manufacturing, retail trade, unemployment, employment, CPI inflation, exports, CHF/EUR
+
+---
+
+**BigQuery datasets created:**
+- `swiss-macro-monitor.swiss_macro_marts` — 2 tables
+  - `mart_macro__time_series` — 13,200 rows
+  - `mart_macro__overview` — 5,000 rows
+
+**Tests:** 6/6 passing (not_null on date, series_id, indicator_name, indicator_category, value in time_series; not_null on date in overview)
+
+---
