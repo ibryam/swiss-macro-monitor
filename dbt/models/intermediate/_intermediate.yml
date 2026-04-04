@@ -1,0 +1,50 @@
+version: 2
+
+models:
+  - name: int_macro_indicators
+    description: >
+      All Swiss macro indicators combined from FRED, SNB and OECD into one table.
+      Adds month-over-month change, year-over-year change, rolling averages,
+      trend direction and economic signal for every indicator on every date.
+
+      This is the calculation layer — no raw data cleanup happens here,
+      only enrichment with derived metrics.
+
+    columns:
+      - name: date
+        description: First day of the observation period
+        tests: [not_null]
+      - name: series_id
+        description: Unique identifier for the indicator series
+        tests: [not_null]
+      - name: indicator_name
+        description: Human-readable indicator name
+        tests: [not_null]
+      - name: indicator_category
+        description: >
+          Category grouping: growth, labour, prices, monetary, external, currency
+        tests: [not_null]
+      - name: value
+        description: Raw indicator value
+        tests: [not_null]
+      - name: mom_change_pct
+        description: >
+          Month-over-month percentage change vs the previous observation.
+          Null for the first observation of each series.
+      - name: yoy_change_pct
+        description: >
+          Year-over-year percentage change vs the same period 12 months ago.
+          Null for the first 12 observations of each series.
+      - name: rolling_avg_3m
+        description: Average value over the current and previous 2 periods
+      - name: rolling_avg_12m
+        description: Average value over the current and previous 11 periods
+      - name: trend
+        description: >
+          Direction of the most recent change.
+          'up' if mom_change_pct > 0.5%, 'down' if < -0.5%, 'flat' otherwise.
+      - name: signal
+        description: >
+          Economic interpretation of the current value and direction.
+          'bullish' = positive for Switzerland, 'bearish' = negative, 'neutral' = unclear.
+          Logic varies by category — see model SQL for full rules.

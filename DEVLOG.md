@@ -212,3 +212,41 @@ Entries are appended in order — never edited or deleted.
 - `swiss-macro-monitor.swiss_macro_staging` — 3 views
 
 ---
+
+## [008] 2026-04-04 — dbt Intermediate Model (5/5 tests passing)
+
+**What:** Built `dbt/models/intermediate/int_macro_indicators.sql` — combines all 3 staging sources into one unified table and adds calculated metrics.
+
+**Why:** Staging only cleans data. The intermediate layer is where the analytical value gets added — MoM changes, YoY changes, rolling averages and economic signals. This is the layer that transforms cleaned numbers into insights. The dashboard doesn't need to calculate these — it just reads them.
+
+**What this model does step by step:**
+
+1. **UNION ALL** — merges stg_fred, stg_snb, stg_oecd into one table (~15,000 rows, all indicators together)
+2. **Window functions** — for each series, looks back at previous rows to calculate:
+   - `prev_period_value` — previous observation (using `LAG(value, 1)`)
+   - `prev_year_value` — same period 12 months ago (using `LAG(value, 12)`)
+   - `rolling_avg_3m` — average of current + 2 previous periods
+   - `rolling_avg_12m` — average of current + 11 previous periods
+3. **MoM and YoY % changes** — calculated as `(value - prev) / prev * 100`
+4. **Trend** — 'up' if MoM > 0.5%, 'down' if < -0.5%, 'flat' otherwise
+5. **Signal** — economic interpretation by category:
+
+| Category | Rising = | Falling = | Logic |
+|----------|----------|-----------|-------|
+| growth | bullish | bearish | GDP, manufacturing, retail — up is good |
+| labour | bearish | bullish | Unemployment — lower is better |
+| prices | bearish if >3% | bearish if <0% | Ideal range 0–2% |
+| external | bullish | bearish | Exports up = economy growing |
+| currency | bullish | bearish | CHF weakening helps exports |
+| monetary | neutral | neutral | Context-dependent, interpreted in marts |
+
+**Key SQL patterns used:**
+- `LAG()` window function — looks at the previous row per series
+- `AVG() OVER (ROWS BETWEEN N PRECEDING AND CURRENT ROW)` — rolling average
+- `SAFE_DIVIDE()` — handles division by zero without crashing
+- `{{ ref('stg_fred_indicators') }}` — dbt ref() tells dbt to run staging first
+
+**BigQuery dataset created:** `swiss-macro-monitor.swiss_macro_intermediate`
+**Tests:** 5/5 passing (not_null on date, series_id, indicator_name, indicator_category, value)
+
+---

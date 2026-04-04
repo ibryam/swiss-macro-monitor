@@ -205,6 +205,62 @@ You never have to manage the order manually.
 
 ---
 
+## Stage 3 — Intermediate (BUILT ✓)
+
+The intermediate model `int_macro_indicators` is now live in BigQuery.
+
+**What it actually does to the data:**
+
+Step 1 — UNION ALL merges all 3 sources:
+```
+stg_fred  (2,701 rows)  ─┐
+stg_snb   (9,655 rows)  ─┼─► int_macro_indicators (~15,000 rows combined)
+stg_oecd  (2,290 rows)  ─┘
+```
+
+Step 2 — Window functions add calculated columns:
+```sql
+-- Look back at the previous observation for this series
+lag(value) over (partition by series_id order by date) as prev_period_value
+
+-- Look back 12 observations (approx 1 year for monthly data)
+lag(value, 12) over (partition by series_id order by date) as prev_year_value
+
+-- Smooth out noise with a 3-period rolling average
+avg(value) over (
+    partition by series_id
+    order by date
+    rows between 2 preceding and current row
+) as rolling_avg_3m
+```
+
+Step 3 — MoM and YoY % changes:
+```
+value: 139,800   prev: 137,200   →   mom_change_pct: +1.89%
+value: 139,800   year_ago: 125,400  →  yoy_change_pct: +11.48%
+```
+
+Step 4 — Trend and signal assigned:
+```
+mom_change_pct: +1.89%   indicator_category: labour
+→ trend: 'up'
+→ signal: 'bearish'   (unemployment rising = bad for economy)
+```
+
+**Real example — SNB Policy Rate on 2024-09-26:**
+```
+date:              2024-09-26
+indicator_name:    SNB Policy Rate
+value:             1.00          ← SNB cut from 1.25 to 1.00
+prev_period_value: 1.25
+mom_change_pct:    -20.0%
+rolling_avg_3m:    1.17
+trend:             down
+signal:            neutral       ← monetary always neutral, context in marts
+```
+
+---
+
 ## Stage 4 — Marts (dashboard-ready)
 
 Mart models are the final output — clean, wide tables ready for Tableau.
