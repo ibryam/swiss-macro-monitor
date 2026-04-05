@@ -21,10 +21,23 @@ models:
         tests: [not_null]
       - name: value
         tests: [not_null]
+      - name: indicator_category
+        tests:
+          - accepted_values:
+              values: ['growth', 'labour', 'prices', 'monetary', 'external', 'currency']
       - name: signal
         description: bullish, neutral or bearish — economic interpretation
+        tests:
+          - accepted_values:
+              values: ['bullish', 'neutral', 'bearish']
+      - name: trend
+        description: up, down or flat based on mom_change_pct
+        tests:
+          - accepted_values:
+              values: ['up', 'down', 'flat']
       - name: is_latest
         description: true for the most recent observation per series
+        tests: [not_null]
 
   - name: mart_macro__overview
     description: >
