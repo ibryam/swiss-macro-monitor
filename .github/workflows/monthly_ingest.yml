@@ -41,29 +41,14 @@ jobs:
       - name: Run OECD ingestion
         run: python ingestion/ingest_oecd.py
 
-      - name: Write dbt profiles for CI
-        run: |
-          cat > dbt/profiles.yml << 'EOF'
-          swiss_macro_monitor:
-            target: prod
-            outputs:
-              prod:
-                type: bigquery
-                method: service-account
-                project: swiss-macro-monitor
-                dataset: swiss_macro
-                keyfile: "/home/runner/work/swiss-macro-monitor/swiss-macro-monitor/gcp-key.json"
-                threads: 4
-                timeout_seconds: 300
-                location: EU
-          EOF
-
       - name: Run dbt
+        env:
+          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         run: |
           cd dbt
           dbt deps
-          dbt run --profiles-dir .
-          dbt test --profiles-dir .
+          dbt run --profiles-dir ci
+          dbt test --profiles-dir ci
 
       - name: Clean up credentials
         if: always()
