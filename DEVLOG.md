@@ -298,6 +298,28 @@ Entries are appended in order — never edited or deleted.
 
 ---
 
+## [011] 2026-04-05 — dbt added to GitHub Actions (full pipeline now automated)
+
+**What:** Added dbt run + dbt test to the monthly GitHub Actions workflow. Also added `dbt-bigquery` to `requirements.txt`.
+
+**Why:** Ingestion scripts updated raw tables every month but dbt never ran in CI — staging, intermediate and mart models were never rebuilt automatically. Tableau was reading stale marts. The pipeline was only half-automated. Now the full flow runs end-to-end on the 2nd of every month: ingest → dbt run → dbt test.
+
+**What changed:**
+- `.github/workflows/monthly_ingest.yml` — added "Write dbt profiles for CI" and "Run dbt" steps; removed leftover BFS step
+- `requirements.txt` — added `dbt-bigquery==1.8.0`
+
+**Pipeline now:**
+```
+GitHub Actions (2nd of month, 07:00 UTC)
+  → ingest_fred.py      → raw_fred_indicators
+  → ingest_snb.py       → raw_snb_indicators
+  → ingest_oecd.py      → raw_oecd_indicators (incl. UNEMP)
+  → dbt run             → staging + intermediate + marts rebuilt
+  → dbt test            → 20/20 tests must pass
+```
+
+---
+
 ## [010] 2026-04-05 — OECD UNEMP replaces FRED for unemployment data
 
 **What:** Added `UNEMP` series to OECD KEI ingestion. Replaced FRED `LMUNRRTTCHM156N` with OECD `KEI/CHE/UNEMP/_T/_Z` across the pipeline.
