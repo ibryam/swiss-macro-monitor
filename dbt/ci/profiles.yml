@@ -3,10 +3,10 @@ swiss_macro_monitor:
   outputs:
     prod:
       type: bigquery
-      method: service-account-json
+      method: service-account
       project: swiss-macro-monitor
       dataset: swiss_macro
-      keyfile_json: "{{ env_var('GCP_SERVICE_ACCOUNT_KEY') }}"
+      keyfile: /tmp/gcp_key.json
       threads: 4
       timeout_seconds: 300
       location: EU

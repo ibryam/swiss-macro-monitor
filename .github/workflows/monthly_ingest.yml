@@ -39,6 +39,9 @@ jobs:
       - name: Run OECD ingestion
         run: python ingestion/ingest_oecd.py
 
+      - name: Write GCP key file for dbt
+        run: echo "$GCP_SERVICE_ACCOUNT_KEY" > /tmp/gcp_key.json
+
       - name: Run dbt
         run: |
           cd dbt
