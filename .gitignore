@@ -1,6 +1,9 @@
 # Environment variables — never commit secrets
 .env
 
+# Development log — local only, not for public repo
+DEVLOG.md
+
 # Google credentials
 *.json
 
