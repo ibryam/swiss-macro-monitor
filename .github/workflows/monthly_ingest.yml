@@ -29,7 +29,15 @@ jobs:
         env:
           GCP_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         run: |
-          python3 -c "import os; open('gcp-key.json','w').write(os.environ['GCP_KEY'].strip())"
+          python3 -c "
+          import os
+          key = os.environ.get('GCP_KEY', '')
+          print(f'Secret length: {len(key)}')
+          print(f'First 10 chars repr: {repr(key[:10])}')
+          stripped = key.strip()
+          print(f'Stripped length: {len(stripped)}')
+          open('gcp-key.json','w').write(stripped)
+          "
           echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/gcp-key.json" >> $GITHUB_ENV
 
       - name: Run FRED ingestion
