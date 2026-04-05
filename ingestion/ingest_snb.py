@@ -17,11 +17,13 @@ Series pulled:
 
 import os
 import io
+import json
 import requests
 import pandas as pd
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from google.cloud import bigquery
+from google.oauth2 import service_account
 
 load_dotenv()
 
@@ -149,8 +151,19 @@ def load_rows(client: bigquery.Client, rows: list[dict]) -> None:
     print(f"  Loaded {len(rows)} rows.")
 
 
+def get_bigquery_client() -> bigquery.Client:
+    key_json = os.getenv("GCP_SERVICE_ACCOUNT_KEY", "").strip()
+    if key_json:
+        info        = json.loads(key_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            info, scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        return bigquery.Client(project=GCP_PROJECT, credentials=credentials)
+    return bigquery.Client(project=GCP_PROJECT)
+
+
 def main():
-    client = bigquery.Client(project=GCP_PROJECT)
+    client = get_bigquery_client()
     ensure_table(client)
 
     for cube, dim_sel, series_code, name, category, unit, frequency in SNB_SERIES:

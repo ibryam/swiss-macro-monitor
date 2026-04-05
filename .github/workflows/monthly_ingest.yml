@@ -13,6 +13,9 @@ jobs:
     name: Ingest all macro sources
     runs-on: ubuntu-latest
 
+    env:
+      GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,13 +27,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-
-      - name: Authenticate to Google Cloud
-        env:
-          GCP_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        run: |
-          python3 -c "import os; open('gcp-key.json','w').write(os.environ['GCP_KEY'].strip())"
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/gcp-key.json" >> $GITHUB_ENV
 
       - name: Run FRED ingestion
         env:
@@ -44,14 +40,8 @@ jobs:
         run: python ingestion/ingest_oecd.py
 
       - name: Run dbt
-        env:
-          GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         run: |
           cd dbt
           dbt deps
           dbt run --profiles-dir ci
           dbt test --profiles-dir ci
-
-      - name: Clean up credentials
-        if: always()
-        run: rm -f gcp-key.json

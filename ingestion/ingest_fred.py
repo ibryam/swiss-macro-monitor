@@ -13,10 +13,12 @@ Series pulled:
 """
 
 import os
+import json
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 from fredapi import Fred
 from google.cloud import bigquery
+from google.oauth2 import service_account
 
 load_dotenv()
 
@@ -110,9 +112,22 @@ def load_rows(client: bigquery.Client, rows: list[dict]) -> None:
     print(f"  Loaded {len(rows)} rows.")
 
 
+def get_bigquery_client() -> bigquery.Client:
+    """Create BigQuery client. Uses GCP_SERVICE_ACCOUNT_KEY env var in CI,
+    falls back to GOOGLE_APPLICATION_CREDENTIALS locally."""
+    key_json = os.getenv("GCP_SERVICE_ACCOUNT_KEY", "").strip()
+    if key_json:
+        info        = json.loads(key_json)
+        credentials = service_account.Credentials.from_service_account_info(
+            info, scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+        return bigquery.Client(project=GCP_PROJECT, credentials=credentials)
+    return bigquery.Client(project=GCP_PROJECT)
+
+
 def main():
     fred   = Fred(api_key=FRED_API_KEY)
-    client = bigquery.Client(project=GCP_PROJECT)
+    client = get_bigquery_client()
 
     ensure_table(client)
 
