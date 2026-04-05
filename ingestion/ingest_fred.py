@@ -28,14 +28,13 @@ DATASET      = "swiss_macro_raw"
 TABLE        = "raw_fred_indicators"
 
 # Series to pull: {series_id: (indicator_name, category, unit)}
-# NOTE: Unemployment (LMUNRRTTCHM156N) removed — replaced by BFS ingest_bfs.py
-#       BFS publishes 3-4 days after month end vs 3-6 months lag for FRED/OECD.
-#       Historical FRED unemployment rows remain in BigQuery but are no longer updated.
+# Removed series (historical rows remain in BigQuery raw but excluded from marts via stg filter):
+#   LMUNRRTTCHM156N — unemployment replaced by OECD UNEMP (lower lag, correct unit)
+#   CPALTT01CHM657N — CPI All Items, FRED stopped updating Mar 2024; replaced by OECD CP/GY
+#   FPCPITOTLZGCHE  — CPI Annual Inflation (annual), FRED stopped updating Jan 2024
 FRED_SERIES = {
-    "CPALTT01CHM657N":   ("CPI All Items",               "prices",   "index"),
-    "CLVMNACSAB1GQCH":   ("Real GDP",                   "growth",   "chf_millions"),
-    "IRLTLT01CHM156N":   ("10Y Government Bond Yield",   "monetary", "percent"),
-    "FPCPITOTLZGCHE":    ("CPI Annual Inflation",        "prices",   "percent"),
+    "CLVMNACSAB1GQCH":   ("Real GDP",                 "growth",   "chf_millions"),
+    "IRLTLT01CHM156N":   ("10Y Government Bond Yield", "monetary", "percent"),
 }
 
 

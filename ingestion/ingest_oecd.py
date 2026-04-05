@@ -50,6 +50,7 @@ SERIES_FILTERS = [
     ("EMP",     "_T", "Y", "_Z", "Employment Total",                     "labour",   "thousands","quarterly"),
     ("UNEMP",   "_T", "Y", "_Z", "Unemployment Rate",                    "labour",   "percent",  "quarterly"),
     ("IRSTCI",  "_Z", "_Z","_Z", "Call Money Interbank Rate",            "monetary", "percent",  "monthly"),
+    ("CP",      "_Z", "_Z","GY", "CPI Annual Growth YoY",                "prices",   "percent",  "monthly"),
 ]
 
 

@@ -65,12 +65,10 @@ pivoted as (
         max(case when series_id = 'KEI/CHE/EMP/_T/_Z'       then signal end)         as employment_signal,
 
         -- Prices
-        max(case when series_id = 'FPCPITOTLZGCHE'          then value end)          as cpi_inflation_pct,
-        max(case when series_id = 'FPCPITOTLZGCHE'          then mom_change_pct end) as cpi_inflation_mom,
-        max(case when series_id = 'FPCPITOTLZGCHE'          then signal end)         as cpi_signal,
-
-        max(case when series_id = 'CPALTT01CHM657N'         then value end)          as cpi_all_items,
-        max(case when series_id = 'CPALTT01CHM657N'         then mom_change_pct end) as cpi_all_items_mom,
+        -- OECD CP/GY: monthly CPI Annual YoY growth, through Dec 2025
+        max(case when series_id = 'KEI/CHE/CP/_Z/GY'        then value end)          as cpi_inflation_pct,
+        max(case when series_id = 'KEI/CHE/CP/_Z/GY'        then mom_change_pct end) as cpi_inflation_mom,
+        max(case when series_id = 'KEI/CHE/CP/_Z/GY'        then signal end)         as cpi_signal,
 
         -- Monetary
         max(case when series_id = 'snbgwdzid/ZIG'           then value end)          as snb_policy_rate,
@@ -167,8 +165,6 @@ select
     cpi_inflation_pct,
     cpi_inflation_mom,
     cpi_signal,
-    cpi_all_items,
-    cpi_all_items_mom,
 
     -- Monetary
     snb_policy_rate,
