@@ -26,9 +26,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Authenticate to Google Cloud
-        run: |
-          echo '${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}' > gcp-key.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=$PWD/gcp-key.json" >> $GITHUB_ENV
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
 
       - name: Run FRED ingestion
         env:
@@ -49,7 +49,3 @@ jobs:
           dbt deps
           dbt run --profiles-dir ci
           dbt test --profiles-dir ci
-
-      - name: Clean up credentials
-        if: always()
-        run: rm -f gcp-key.json
