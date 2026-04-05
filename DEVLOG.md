@@ -297,3 +297,23 @@ Entries are appended in order — never edited or deleted.
 **Tests:** 6/6 passing (not_null on date, series_id, indicator_name, indicator_category, value in time_series; not_null on date in overview)
 
 ---
+
+## [010] 2026-04-05 — OECD UNEMP replaces FRED for unemployment data
+
+**What:** Added `UNEMP` series to OECD KEI ingestion. Replaced FRED `LMUNRRTTCHM156N` with OECD `KEI/CHE/UNEMP/_T/_Z` across the pipeline.
+
+**Why:** Tableau KPI tile for unemployment showed null for 2024–2026. Root cause: FRED sources Swiss unemployment from OECD and republishes it with an additional 3–6 month delay. The OECD KEI dataset we already pull has `UNEMP` directly with ~1 quarter lag and data confirmed up to Q4 2025. No new script, no new data source — just one extra filter in the existing OECD ingestion.
+
+**What changed:**
+
+| File | Change |
+|------|--------|
+| `ingestion/ingest_fred.py` | Removed `LMUNRRTTCHM156N` — OECD now owns unemployment |
+| `ingestion/ingest_oecd.py` | Added `UNEMP/_T/Y/_Z` to `SERIES_FILTERS` |
+| `dbt/models/marts/mart_macro__overview.sql` | Updated unemployment pivot to `KEI/CHE/UNEMP/_T/_Z` |
+
+**Data note:** Historical FRED unemployment rows remain in BigQuery but are no longer updated or surfaced in the mart. OECD UNEMP is quarterly — unemployment tile will show the most recent quarter's value via `is_latest = true` in `mart_macro__time_series`.
+
+**Series confirmed:** `UNEMP/_T/Y/_Z` — 4.84% for full year 2025, Q4 2025 = 5.08%
+
+---

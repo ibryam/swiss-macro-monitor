@@ -41,6 +41,9 @@ jobs:
       - name: Run OECD ingestion
         run: python ingestion/ingest_oecd.py
 
+      - name: Run BFS ingestion
+        run: python ingestion/ingest_bfs.py
+
       - name: Clean up credentials
         if: always()
         run: rm -f gcp-key.json

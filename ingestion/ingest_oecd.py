@@ -46,6 +46,7 @@ SERIES_FILTERS = [
     ("TOVM",    "G47","Y", "GY", "Retail Trade Volume Growth YoY",       "growth",   "percent",  "monthly"),
     ("EX",      "_T", "Y", "G1", "Merchandise Exports Growth QoQ",       "external", "percent",  "quarterly"),
     ("EMP",     "_T", "Y", "_Z", "Employment Total",                     "labour",   "thousands","quarterly"),
+    ("UNEMP",   "_T", "Y", "_Z", "Unemployment Rate",                    "labour",   "percent",  "quarterly"),
     ("IRSTCI",  "_Z", "_Z","_Z", "Call Money Interbank Rate",            "monetary", "percent",  "monthly"),
 ]
 

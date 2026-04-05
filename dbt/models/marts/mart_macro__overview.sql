@@ -54,10 +54,11 @@ pivoted as (
         max(case when series_id = 'KEI/CHE/TOVM/G47/GY'    then signal end)         as retail_trade_signal,
 
         -- Labour
-        max(case when series_id = 'LMUNRRTTCHM156N'         then value end)          as unemployment,
-        max(case when series_id = 'LMUNRRTTCHM156N'         then mom_change_pct end) as unemployment_mom,
-        max(case when series_id = 'LMUNRRTTCHM156N'         then yoy_change_pct end) as unemployment_yoy,
-        max(case when series_id = 'LMUNRRTTCHM156N'         then signal end)         as unemployment_signal,
+        -- OECD UNEMP: quarterly, ~1 quarter lag — replaces FRED LMUNRRTTCHM156N (3-6 month lag)
+        max(case when series_id = 'KEI/CHE/UNEMP/_T/_Z'  then value end)          as unemployment,
+        max(case when series_id = 'KEI/CHE/UNEMP/_T/_Z'  then mom_change_pct end) as unemployment_mom,
+        max(case when series_id = 'KEI/CHE/UNEMP/_T/_Z'  then yoy_change_pct end) as unemployment_yoy,
+        max(case when series_id = 'KEI/CHE/UNEMP/_T/_Z'  then signal end)         as unemployment_signal,
 
         max(case when series_id = 'KEI/CHE/EMP/_T/_Z'       then value end)          as employment_thousands,
         max(case when series_id = 'KEI/CHE/EMP/_T/_Z'       then mom_change_pct end) as employment_mom,
