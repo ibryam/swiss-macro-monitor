@@ -111,7 +111,7 @@ All 3 sources share the same raw schema: `date, source, series_id, indicator_nam
 - [x] 5b. dbt intermediate model — MoM/YoY, rolling averages, signals (5 tests)
 - [x] 5c. dbt mart models — time_series + overview, is_latest flag, composite signal (13 tests)
 - [x] 6. GitHub Actions — full pipeline automated, dbt runs in CI, 27/27 tests passing
-- [ ] 7. Tableau Public dashboard
+- [x] 7. Tableau Public dashboard — https://public.tableau.com/app/profile/ibryam/viz/SwissMacroMonitor/Overview
 
 ---
 

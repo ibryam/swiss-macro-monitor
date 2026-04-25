@@ -6,21 +6,18 @@
     stg_oecd_indicators
 
     Cleans raw OECD data:
-    - OECD dates come in two formats:
-        monthly:   YYYY-MM   → first day of month
-        quarterly: YYYY-QX   → first day of the quarter
-            Q1 → 01-01
-            Q2 → 04-01
-            Q3 → 07-01
-            Q4 → 10-01
+    - OECD dates come in multiple formats (annual YYYY, monthly YYYY-MM, quarterly YYYY-QX)
+    - We only keep rows matching the expected frequency per series:
+        monthly series  → YYYY-MM only
+        quarterly series → YYYY-QX only
+      This eliminates duplicate dates caused by OECD returning all frequency
+      variants for the same indicator (e.g. monthly + quarterly manufacturing).
     - Removes null values
     - Standardises column names
 */
 
 select
     case
-        when length(date) = 4
-            then cast(concat(date, '-01-01') as date)
         when length(date) = 7 and date not like '%-Q%'
             then cast(concat(date, '-01') as date)
         when date like '%-Q1'
@@ -45,3 +42,7 @@ select
 from {{ source('swiss_macro_raw', 'raw_oecd_indicators') }}
 
 where value is not null
+  and (
+      (frequency = 'monthly'   and length(date) = 7 and date not like '%-Q%')
+   or (frequency = 'quarterly' and date like '%-Q%')
+  )

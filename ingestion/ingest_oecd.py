@@ -83,7 +83,8 @@ def extract_series(
         (df["MEASURE"]        == measure)       &
         (df["ACTIVITY"]       == activity)      &
         (df["ADJUSTMENT"]     == adjustment)    &
-        (df["TRANSFORMATION"] == transformation)
+        (df["TRANSFORMATION"] == transformation) &
+        (df["FREQ"]           != "A")
     )
     filtered = df[mask].copy()
     filtered["OBS_VALUE"] = pd.to_numeric(filtered["OBS_VALUE"], errors="coerce")
